@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "bitfinex-order-book-app",
+    "slug": "bitfinex-order-book-app",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
