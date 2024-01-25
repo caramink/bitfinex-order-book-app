@@ -78,8 +78,8 @@ const OrderBook = connect((state) => ({
                     <View style={styles.tools}>
                         {!connectionStatus && <TouchableOpacity onPress={startConnection}><Text style={styles.iconText}>Connect</Text></TouchableOpacity>}
                         {connectionStatus && <TouchableOpacity onPress={stopConnection}><Text style={styles.iconText}>Disconnect</Text></TouchableOpacity>}
-                        <TouchableOpacity onPress={incPrecision}><Text style={styles.iconText}>.0</Text></TouchableOpacity>
-                        <TouchableOpacity onPress={decPrecision}><Text style={styles.iconText}>.00</Text></TouchableOpacity>
+                        <TouchableOpacity onPress={incPrecision}><Text style={styles.iconText}>.00</Text></TouchableOpacity>
+                        <TouchableOpacity onPress={decPrecision}><Text style={styles.iconText}>.0</Text></TouchableOpacity>
                         <TouchableOpacity onPress={decScale}><MaterialIcons name="zoom-out" size={20} color="white" /></TouchableOpacity>
                         <TouchableOpacity onPress={incScale}><MaterialIcons name="zoom-in" size={20} color="white" /></TouchableOpacity>
                     </View>
