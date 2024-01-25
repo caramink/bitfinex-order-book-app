@@ -7,7 +7,7 @@ const initialState = {
   mcnt: 0,
 };
 
-function orderBookReducer(state = initialState, action) {
+function OrderBookReducer(state = initialState, action) {
   switch (action.type) {
     case UPDATE_BOOK:
       return { ...action.payload };
@@ -16,4 +16,4 @@ function orderBookReducer(state = initialState, action) {
   }
 }
 
-export default orderBookReducer;
+export default OrderBookReducer;

@@ -8,22 +8,18 @@ const conf = {
   wshost: 'wss://api.bitfinex.com/ws/2'
 }
 
-const BOOK_CHANNEL_ID   = 146652
 let BOOK = {}
 let connected = false
 let connecting = false
 let cli
 let seq = null
 let channels = {}
-function socket ({ book, saveBook, precesion, setConnectionStatus, connectionStatus }) {
-  if(!connecting && !connected) cli = new WebSocket(conf.wshost, "protocolOne");
-  if(!connectionStatus){ cli.close(); return}
+function socket({ book, saveBook, precesion, setConnectionStatus, connectionStatus }) {
+  if (!connecting && !connected) cli = new WebSocket(conf.wshost, "protocolOne");
+  if (!connectionStatus) { cli.close(); return }
   if (connecting || connected) return
   connecting = true
-  // cli = new WebSocket(conf.wshost, { #<{(| rejectUnauthorized: false |)}># })
-
-
-  cli.onopen =  function open () {
+  cli.onopen = function open() {
     console.log('WS open')
     connecting = false
     connected = true
@@ -35,7 +31,7 @@ function socket ({ book, saveBook, precesion, setConnectionStatus, connectionSta
     cli.send(JSON.stringify({ event: 'conf', flags: 65536 + 131072 }))
     cli.send(JSON.stringify({ event: 'subscribe', channel: 'book', pair: pair, prec: "P0", len: 25, freq: 'F0' }))
   }
-  cli.onclose = function open () {
+  cli.onclose = function open() {
     seq = null
     console.log('WS close')
     connecting = false
@@ -46,14 +42,13 @@ function socket ({ book, saveBook, precesion, setConnectionStatus, connectionSta
   cli.onmessage = function (message_event) {
     var msg = message_event.data
     msg = JSON.parse(msg)
-    if(msg.event === "subscribed") {
+    if (msg.event === "subscribed") {
       channels[msg.channel] = msg.chanId
-      console.log({channels})
+      console.log({ channels })
     }
 
-    if(msg.event) return
-    // {{{ Order Book
-    if(msg[0] === channels["book"]){
+    if (msg.event) return
+    if (msg[0] === channels["book"]) {
       if (msg[1] === 'hb') {
         seq = +msg[2]
         return
@@ -81,15 +76,12 @@ function socket ({ book, saveBook, precesion, setConnectionStatus, connectionSta
         let cs_str = csdata.join(':')
         let cs_calc = CRC.str(cs_str)
 
-        //fs.appendFileSync(logfile, '[' + moment().format('YYYY-MM-DDTHH:mm:ss.SSS') + '] ' + pair + ' | ' + JSON.stringify(['cs_string=' + cs_str, 'cs_calc=' + cs_calc, 'server_checksum=' + checksum]) + '\n')
+
         if (cs_calc !== checksum) {
           console.error('CHECKSUM_FAILED')
-          // process.exit(-1)
         }
         return
       }
-
-      //fs.appendFileSync(logfile, '[' + moment().format('YYYY-MM-DDTHH:mm:ss.SSS') + '] ' + pair + ' | ' + JSON.stringify(msg) + '\n')
 
       if (BOOK.mcnt === 0) {
         _.each(msg[1], function (pp) {
@@ -97,7 +89,6 @@ function socket ({ book, saveBook, precesion, setConnectionStatus, connectionSta
           let side = pp.amount >= 0 ? 'bids' : 'asks'
           pp.amount = Math.abs(pp.amount)
           if (BOOK[side][pp.price]) {
-            //fs.appendFileSync(logfile, '[' + moment().format() + '] ' + pair + ' | ' + JSON.stringify(pp) + ' BOOK snap existing bid override\n')
           }
           BOOK[side][pp.price] = pp
         })
@@ -111,7 +102,6 @@ function socket ({ book, saveBook, precesion, setConnectionStatus, connectionSta
 
         if (cseq - seq !== 1) {
           console.error('OUT OF SEQUENCE', seq, cseq)
-          // process.exit()
         }
 
         seq = cseq
@@ -135,9 +125,7 @@ function socket ({ book, saveBook, precesion, setConnectionStatus, connectionSta
             }
           }
 
-          if (!found) {
-            //fs.appendFileSync(logfile, '[' + moment().format() + '] ' + pair + ' | ' + JSON.stringify(pp) + ' BOOK delete fail side not found\n')
-          }
+
         } else {
           let side = pp.amount >= 0 ? 'bids' : 'asks'
           pp.amount = Math.abs(pp.amount)
@@ -161,21 +149,9 @@ function socket ({ book, saveBook, precesion, setConnectionStatus, connectionSta
       })
 
       BOOK.mcnt++
-      // checkCross(msg,BOOK)
       saveBook(BOOK)
     }
-  }// Order Book }}}
-}
-
-
-function checkCross (msg,BOOK) {
-  let bid = BOOK.psnap.bids[0]
-  let ask = BOOK.psnap.asks[0]
-  if (bid >= ask) {
-    let lm = [moment.utc().format(), 'bid(' + bid + ')>=ask(' + ask + ')']
-    //fs.appendFileSync(logfile, lm.join('/') + '\n')
-    console.log(lm.join('/'))
   }
 }
 
-export {connected, socket}
+export { connected, socket }
